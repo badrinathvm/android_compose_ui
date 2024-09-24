@@ -3,13 +3,38 @@ package com.example.composeuiapp.viewModel
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.composeuiapp.service.APiClient
 import com.example.composeuiapp.data.Post
+import com.example.composeuiapp.service.APIService
 import kotlinx.coroutines.launch
 
-// PostViewModel class is responsible for managing UI-related data for the Post screen.
+class PostViewModel(private val apiService: APIService = APiClient.apiService) : ViewModel() {
+
+    private val _posts = MutableLiveData<List<Post>>()
+    val posts: LiveData<List<Post>> = _posts
+
+    init {
+        fetchPosts()
+    }
+
+    fun fetchPosts() {
+        viewModelScope.launch {
+            try {
+                _posts.value = apiService.getPosts()
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+}
+
+/** Older code
+
+ //PostViewModel class is responsible for managing UI-related data for the Post screen.
 class PostViewModel : ViewModel() {
 
     // Mutable state to hold the list of posts. It starts as an empty list.
@@ -26,7 +51,7 @@ class PostViewModel : ViewModel() {
 
     // Private function to fetch posts from the network asynchronously.
     // This function uses Kotlin Coroutines and is launched within the ViewModel's coroutine scope.
-    private fun fetchPosts() {
+    fun fetchPosts() {
         viewModelScope.launch {
             try {
                 // Network call to get the posts from the API. This is a suspend function.
@@ -43,3 +68,4 @@ class PostViewModel : ViewModel() {
         }
     }
 }
+**/
